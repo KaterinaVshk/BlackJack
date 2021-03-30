@@ -79,16 +79,18 @@ class Game
   def determine_winner(user_score, dealer_score)
     return @dealer if user_score > 21
     return @user if dealer_score > 21
+    return @user if user_score == 22 && user.cards.length == 2
     return @user if user_score > dealer_score
     return 0 if user_score == dealer_score
 
     @dealer
   end
 
-  def print_result(winner)
+  def calculate_result(winner)
     case winner
     when @user
-      return "\n У вас блэкджэк !!!! WINNING!!!!".rjust(30) if @user.cards.length == 2 && @user.score == 21
+      return "\n BLACKJACK !!!! WINNING!!!!".rjust(30) if @user.cards.length == 2 && @user.score == 21
+      return "\n SUPER WINNER!!!!".rjust(30) if @user.score == 22
 
       'WINNING!!!'.rjust(30)
     when @dealer
