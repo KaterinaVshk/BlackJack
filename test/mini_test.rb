@@ -10,39 +10,20 @@ require 'minitest/autorun'
 
 class CardTest < Minitest::Test
   def test_initialize_raises_argument_exception
-    assert_raises(ArgumentError) { Card.new('a', 'b', 'c') }
-  end
-
-  def test_count_value_jack
-    test_card = Card.new('clubs', 'J')
-    assert_equal(10, test_card.count_value)
-  end
-
-  def test_count_value_ace
-    test_card = Card.new('clubs', 'A')
-    assert_equal(11, test_card.count_value)
-  end
-
-  def test_number_count_value
-    test_card = Card.new('clubs', 7)
-    assert_equal(7, test_card.count_value)
+    assert_raises(ArgumentError) { Card.new('a', 'b') }
   end
 end
 
 class DeckTest < Minitest::Test
-  def test_initialize_raises_argument_exception
-    assert_raises(ArgumentError) { Deck.new('a', 'b') }
-  end
-
-  def test_52_cards_build_deck
-    deck = Deck.new
-    assert_equal(52, deck.cards.length)
+  def test_36_cards_build_deck
+    deck = Deck.new.build_deck
+    assert_equal(36, deck.length)
   end
 end
 
 class PlayerTest < Minitest::Test
   def setup
-    @deck = Deck.new
+    @deck = Deck.new.build_deck
     @player = Player.new('Player')
   end
 
@@ -53,12 +34,12 @@ class PlayerTest < Minitest::Test
   def test_player_take_card_and_deck_decreases
     @player.take_card!(@deck)
     assert_equal(1, @player.cards.length)
-    assert_equal(51, @deck.cards.length)
+    assert_equal(35, @deck.length)
   end
 
   def test_count_score_black_jack
-    @player.cards[0] = Card.new('clubs', 'A')
-    @player.cards[1] = Card.new('clubs', 10)
+    @player.cards[0] = Card.new('clubs', 11, 'A')
+    @player.cards[1] = Card.new('clubs', 10, '10')
     assert_equal(21, @player.count_score)
   end
 end
@@ -73,28 +54,34 @@ class GameTest < Minitest::Test
   end
 
   def test_dealer_play_with_21_score
-    @game.dealer.cards[0] = Card.new('clubs', 'A')
-    @game.dealer.cards[1] = Card.new('clubs', 10)
+    @game.dealer.cards[0] = Card.new('clubs', 11, 'A')
+    @game.dealer.cards[1] = Card.new('clubs', 10, 10)
     @game.dealer_play(@game.deck)
     assert_equal(21, @game.dealer.score)
   end
 
   def test_dealer_play_with_17_score
-    @game.dealer.cards[0] = Card.new('clubs', 7)
-    @game.dealer.cards[1] = Card.new('clubs', 10)
+    @game.dealer.cards[0] = Card.new('clubs', 7, 7)
+    @game.dealer.cards[1] = Card.new('clubs', 10, 10)
     @game.dealer_play(@game.deck)
     assert_equal(17, @game.dealer.score)
   end
 
   def test_dealer_play_with_16_score
-    @game.dealer.cards[0] = Card.new('clubs', 6)
-    @game.dealer.cards[1] = Card.new('clubs', 10)
+    @game.dealer.cards[0] = Card.new('clubs', 6, 6)
+    @game.dealer.cards[1] = Card.new('clubs', 10 ,10)
     @game.dealer_play(@game.deck)
     assert_operator @game.dealer.score, :>=, 17
   end
 
   def test_user_has_more_than_21
     @game.user.score = 22
+    assert_equal(@game.dealer, @game.determine_winner(@game.user.score, 18))
+  end
+
+  def test_user_has_2_aces
+    @game.user.score = 22
+    2.times { @game.user.cards << Card.new('clubs', 11, 'A') }
     assert_equal(@game.dealer, @game.determine_winner(@game.user.score, 18))
   end
 
@@ -135,22 +122,27 @@ class GameTest < Minitest::Test
     assert_equal(true, @game.game_over?('N'))
   end
 
-  def test_print_result_if_user_win
+  def test_calculate_result_if_user_win
     @game.user.score = 15
-    assert_equal 'WINNING!!!'.rjust(30), @game.print_result(@game.user)
+    assert_equal 'WINNING!!!'.rjust(30), @game.calculate_result(@game.user)
   end
 
-  def test_print_result_if_dealer_win
-    assert_equal 'LOSING!!!!'.rjust(30), @game.print_result(@game.dealer)
+  def test_calculate_result_if_dealer_win
+    assert_equal 'LOSING!!!!'.rjust(30), @game.calculate_result(@game.dealer)
   end
 
-  def test_print_result_if_draw
-    assert_equal 'DRAW!!!!'.rjust(30), @game.print_result(0)
+  def test_calculate_result_if_draw
+    assert_equal 'DRAW!!!!'.rjust(30), @game.calculate_result(0)
   end
 
-  def test_print_result_if_blackjack
+  def test_calculate_result_if_blackjack
     @game.user.score = 21
-    2.times { @game.user.cards << Card.new('clubs', 6) }
-    assert_equal "\n У вас блэкджэк !!!! WINNING!!!!".rjust(30), @game.print_result(@game.user)
+    2.times { @game.user.cards << Card.new('clubs', 6, 6) }
+    assert_equal "\n BLACKJACK !!!! WINNING!!!!".rjust(30), @game.calculate_result(@game.user)
+  end
+  def test_calculate_result_if_blackjack
+    @game.user.score = 22
+    2.times { @game.user.cards << Card.new('clubs', 11, 'A') }
+    assert_equal "\n SUPER WINNER!!!!".rjust(30), @game.calculate_result(@game.user)
   end
 end
