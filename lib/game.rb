@@ -8,7 +8,7 @@ class Game
   attr_reader :deck, :user, :dealer, :game_over
 
   def initialize
-    @deck = Deck.new
+    @deck = Deck.new.build_deck
     @user = Player.new('User')
     @dealer = Player.new('Dealer')
     @game_over = false
@@ -105,7 +105,7 @@ class Game
 
   def game_over?(answer)
     if answer == 'Y'
-      @deck = Deck.new
+      @deck = Deck.new.build_deck
       @user.cards = []
       @dealer.cards = []
       false

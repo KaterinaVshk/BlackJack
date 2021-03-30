@@ -10,12 +10,12 @@ class Player
   end
 
   def take_card!(deck)
-    @cards << deck.cards.shift
+    @cards << deck.shift
   end
 
   def count_score
     sum = 0
-    cards.each { |card| sum += card.count_value }
+    cards.each { |card| sum += card.value }
     @score = sum
   end
 end

@@ -1,29 +1,19 @@
 # frozen_string_literal: true
 
 class Card
-  FIGURES = %w[K Q J A].freeze
-  attr_reader :suit, :value
-
-  def initialize(suit, value)
+  attr_accessor :suit, :value, :rank
+  SUITS_MAP = {'hearts' => "\u2661", 'clubs' => "\u2667" , 'diamons' => "\u2662" , 'spades' => "\u2664" }
+  VALUES = {6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 'J' => 2, 'Q' => 3, 'K' => 4 , 'A' => 11}.invert
+  def initialize(suit, value, rank)
     @suit = suit
     @value = value
-  end
-
-  def count_value
-    return 11 if @value == FIGURES[3]
-    return 10 if FIGURES[0...-1].include?(@value)
-
-    @value
+    @rank = rank
   end
 
   def print
     puts '  _____'
-    puts " | #{@value}  |" if @value == 10
-    puts " | #{@value}   |" if FIGURES.include?(@value) || @value < 10
-    puts " | \u2661   |" if @suit == 'hearts'
-    puts " | \u2667   |" if @suit == 'clubs'
-    puts " | \u2662   |" if @suit == 'diamons'
-    puts " | \u2664   |" if @suit == 'spades'
+    puts " | #{VALUES[@value]}   |"
+    puts " | #{SUITS_MAP[@suit]}   |" 
     puts ' |_____| '
   end
 end
